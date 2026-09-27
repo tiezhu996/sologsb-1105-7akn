@@ -8,6 +8,7 @@ import { COLOR_MODES, SCAN_QUALITIES } from '../types/scan'
 import { usePlaceSearch } from '../hooks/usePlaceSearch'
 import { estimateSheetSpan, scaleToText } from '../utils/scale'
 import { downloadJson } from '../utils/export'
+import BearingGrid from '../components/common/BearingGrid.vue'
 import PairRow from '../components/common/PairRow.vue'
 import ScanCard from '../components/common/ScanCard.vue'
 import VacantHint from '../components/common/VacantHint.vue'
@@ -196,6 +197,16 @@ watch(sheetId, () => {
         </section>
       </aside>
     </div>
+
+    <section class="section-title">
+      <div>
+        <h2>图幅方位图</h2>
+        <span class="muted">按上中下三行、左中右三列归置本图幅地名；方位文字认不出方向的暂置中格，标方位待核。</span>
+      </div>
+    </section>
+
+    <BearingGrid v-if="relatedPlaces.length" :pairs="relatedPlaces" />
+    <div v-else class="empty-inline">本图幅尚未录入地名对照，方位图暂无内容。</div>
 
     <section class="section-title">
       <div>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { usePlaceStore, type NewPlacePair } from '../stores/placeStore'
+import { usePlaceStore } from '../stores/placeStore'
 import { useSheetStore } from '../stores/sheetStore'
-import type { Certainty, PlacePair, PlaceType } from '../types/placePair'
-import { CERTAINTIES, PLACE_TYPES } from '../types/placePair'
+import type { Bearing, Certainty, PlacePair, PlaceType } from '../types/placePair'
+import { BEARINGS, CERTAINTIES, PLACE_TYPES } from '../types/placePair'
+import { inferBearingFromNote } from '../utils/bearing'
 import { usePlaceSearch } from '../hooks/usePlaceSearch'
 import PairRow from '../components/common/PairRow.vue'
 import VacantHint from '../components/common/VacantHint.vue'
@@ -15,19 +16,32 @@ const { matches } = usePlaceSearch(placeStore.keyword)
 const showCreateForm = ref(false)
 const formError = ref('')
 
-function createEmptyForm(): NewPlacePair {
+/** 方位格可显式指定，也可交给方位文字自动辨认 */
+type BearingChoice = Bearing | '自动'
+
+interface PlaceFormState {
+  sheetId: string
+  oldName: string
+  newName: string
+  placeType: PlaceType
+  coordNote: string
+  certainty: Certainty
+  bearingChoice: BearingChoice
+}
+
+function createEmptyForm(): PlaceFormState {
   return {
     sheetId: sheetStore.sheets[0]?.id ?? '',
     oldName: '',
     newName: '',
-    aliasList: [],
     placeType: '村镇',
     coordNote: '',
     certainty: '确定',
+    bearingChoice: '自动',
   }
 }
 
-const form = reactive<NewPlacePair>(createEmptyForm())
+const form = reactive<PlaceFormState>(createEmptyForm())
 const aliasInput = ref('')
 
 const visiblePairs = computed(() =>
@@ -52,11 +66,20 @@ async function submitPlace(): Promise<void> {
     formError.value = '请选择所属图幅，并填写古名与今名。'
     return
   }
+  const coordNote = form.coordNote.trim() || '图上方位待核'
+  const placement =
+    form.bearingChoice === '自动'
+      ? inferBearingFromNote(coordNote)
+      : { bearing: form.bearingChoice, pending: false }
   await placeStore.addPair({
-    ...form,
+    sheetId: form.sheetId,
     oldName: form.oldName.trim(),
     newName: form.newName.trim(),
-    coordNote: form.coordNote.trim() || '图上方位待核',
+    placeType: form.placeType,
+    coordNote,
+    certainty: form.certainty,
+    bearing: placement.bearing,
+    bearingPending: placement.pending,
     aliasList: aliasInput.value
       .split(/[、，,]/)
       .map((alias) => alias.trim())
@@ -119,6 +142,12 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="异写异读">
           <input v-model="aliasInput" class="native-field" data-testid="field-aliasList" placeholder="多个异写用逗号分隔" />
+        </el-form-item>
+        <el-form-item label="方位格">
+          <select v-model="form.bearingChoice" class="native-field" data-testid="field-bearing">
+            <option value="自动">按方位文字辨认</option>
+            <option v-for="bearing in BEARINGS" :key="bearing" :value="bearing">{{ bearing }}格</option>
+          </select>
         </el-form-item>
         <el-form-item label="图上方位" required class="form-grid__wide">
           <textarea v-model="form.coordNote" class="native-field" data-testid="field-coordNote" rows="3"></textarea>

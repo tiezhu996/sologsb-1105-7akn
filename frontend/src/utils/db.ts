@@ -3,6 +3,7 @@ import type { NameHistory } from '../types/history'
 import type { PlacePair } from '../types/placePair'
 import type { ScanItem } from '../types/scan'
 import type { Sheet } from '../types/sheet'
+import { inferBearingFromNote } from './bearing'
 
 const sheets: Sheet[] = [
   {
@@ -226,7 +227,10 @@ const scans: ScanItem[] = [
   },
 ]
 
-const placePairs: PlacePair[] = [
+/** 种子记录只录方位文字，bearing 与 bearingPending 在入库时统一从文字推断 */
+type PlacePairSeed = Omit<PlacePair, 'bearing' | 'bearingPending'>
+
+const placePairs: PlacePairSeed[] = [
   {
     id: 'place-bp-jia-3-1',
     sheetId: 'sheet-bp-jia-3',
@@ -328,6 +332,16 @@ const placePairs: PlacePair[] = [
     certainty: '确定',
   },
   {
+    id: 'place-bd-zhong-4-3',
+    sheetId: 'sheet-bd-zhong-4',
+    oldName: '马号街',
+    newName: '保定市裕华路一带',
+    aliasList: ['马号胡同', '马号'],
+    placeType: '村镇',
+    coordNote: '图上方位待核',
+    certainty: '待考',
+  },
+  {
     id: 'place-kf-chengxi-1-1',
     sheetId: 'sheet-kf-chengxi-1',
     oldName: '汴梁西门',
@@ -408,10 +422,35 @@ class GboldmapDatabase extends Dexie {
           })
       })
 
+    this.version(3)
+      .stores({
+        sheets: 'id, code, year, scale, status, series',
+        scans: 'id, sheetId, importedAt, quality',
+        placePairs: 'id, sheetId, oldName, newName, placeType, certainty',
+        histories: 'id, placePairId, period, changeType',
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table<PlacePair, string>('placePairs')
+          .toCollection()
+          .modify((pair: PlacePair) => {
+            if (!pair.bearing) {
+              const inferred = inferBearingFromNote(pair.coordNote)
+              pair.bearing = inferred.bearing
+              pair.bearingPending = inferred.pending
+            }
+          })
+      })
+
     this.on('populate', async () => {
       await this.sheets.bulkAdd(sheets)
       await this.scans.bulkAdd(scans)
-      await this.placePairs.bulkAdd(placePairs)
+      await this.placePairs.bulkAdd(
+        placePairs.map((pair) => {
+          const inferred = inferBearingFromNote(pair.coordNote)
+          return plain<PlacePair>({ ...pair, bearing: inferred.bearing, bearingPending: inferred.pending })
+        }),
+      )
       await this.histories.bulkAdd(histories)
     })
   }

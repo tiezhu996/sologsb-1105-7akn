@@ -819,6 +819,112 @@ mark {
 .slot-southwest { grid-area: 3 / 1; }
 .slot-center { grid-area: 2 / 2; }
 
+.bearing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(150px, auto));
+  gap: 13px;
+  padding: 18px;
+  background:
+    linear-gradient(rgba(128, 104, 75, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(128, 104, 75, 0.075) 1px, transparent 1px),
+    #eee3d3;
+  background-size: 18px 18px;
+  border: 1px solid #c8b49b;
+  border-radius: 10px;
+}
+
+.bearing-cell {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  background: rgba(249, 244, 235, 0.95);
+  border: 1px solid #cdbca7;
+  border-radius: 7px;
+}
+
+.bearing-cell--center {
+  background: rgba(243, 232, 214, 0.97);
+  border: 1px dashed #b39a7d;
+}
+
+.bearing-cell__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.bearing-cell__direction {
+  color: #98735b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.bearing-cell__count {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.bearing-cell__list {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.bearing-place {
+  padding: 8px 10px;
+  background: #fbf7ef;
+  border: 1px solid #ddcfbd;
+  border-left: 3px solid #9c7a5e;
+  border-radius: 5px;
+}
+
+.bearing-place__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bearing-place__old {
+  font-size: 14px;
+}
+
+.bearing-place__new {
+  margin: 4px 0 6px;
+  color: var(--moss);
+  font-size: 12px;
+}
+
+.bearing-cell__empty {
+  margin: auto;
+  padding: 12px 0;
+  color: #ab987f;
+  font-size: 12px;
+  text-align: center;
+}
+
+.bearing-grid__note {
+  margin: 10px 4px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bearing-northwest { grid-area: 1 / 1; }
+.bearing-north { grid-area: 1 / 2; }
+.bearing-northeast { grid-area: 1 / 3; }
+.bearing-west { grid-area: 2 / 1; }
+.bearing-center { grid-area: 2 / 2; }
+.bearing-east { grid-area: 2 / 3; }
+.bearing-southwest { grid-area: 3 / 1; }
+.bearing-south { grid-area: 3 / 2; }
+.bearing-southeast { grid-area: 3 / 3; }
+
 .vacant-hint {
   padding: 44px 24px;
   color: #6c594a;
@@ -980,6 +1086,23 @@ mark {
   .slot-northeast,
   .slot-southwest,
   .slot-center {
+    grid-area: auto;
+  }
+
+  .bearing-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .bearing-northwest,
+  .bearing-north,
+  .bearing-northeast,
+  .bearing-west,
+  .bearing-center,
+  .bearing-east,
+  .bearing-southwest,
+  .bearing-south,
+  .bearing-southeast {
     grid-area: auto;
   }
 }
