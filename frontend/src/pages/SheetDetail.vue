@@ -9,6 +9,7 @@ import { usePlaceSearch } from '../hooks/usePlaceSearch'
 import { estimateSheetSpan, scaleToText } from '../utils/scale'
 import { downloadJson } from '../utils/export'
 import PairRow from '../components/common/PairRow.vue'
+import PositionGrid from '../components/common/PositionGrid.vue'
 import ScanCard from '../components/common/ScanCard.vue'
 import VacantHint from '../components/common/VacantHint.vue'
 
@@ -196,6 +197,15 @@ watch(sheetId, () => {
         </section>
       </aside>
     </div>
+
+    <section class="section-title">
+      <div>
+        <h2>图上方位九宫格</h2>
+        <span class="muted">按上中下三行、左中右三列布格，地名依图上方位归格；认不出方向的旧记录暂列中格并标方位待核。</span>
+      </div>
+    </section>
+
+    <PositionGrid :places="relatedPlaces" />
 
     <section class="section-title">
       <div>

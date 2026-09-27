@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { usePlaceStore, type NewPlacePair } from '../stores/placeStore'
 import { useSheetStore } from '../stores/sheetStore'
 import type { Certainty, PlacePair, PlaceType } from '../types/placePair'
-import { CERTAINTIES, PLACE_TYPES } from '../types/placePair'
+import { CERTAINTIES, GRID_POSITIONS, PLACE_TYPES } from '../types/placePair'
 import { usePlaceSearch } from '../hooks/usePlaceSearch'
 import PairRow from '../components/common/PairRow.vue'
 import VacantHint from '../components/common/VacantHint.vue'
@@ -23,6 +23,7 @@ function createEmptyForm(): NewPlacePair {
     aliasList: [],
     placeType: '村镇',
     coordNote: '',
+    gridPosition: '中',
     certainty: '确定',
   }
 }
@@ -115,6 +116,11 @@ onMounted(() => {
         <el-form-item label="确定度" required>
           <select v-model="form.certainty" class="native-field" data-testid="field-certainty">
             <option v-for="certainty in CERTAINTIES" :key="certainty" :value="certainty">{{ certainty }}</option>
+          </select>
+        </el-form-item>
+        <el-form-item label="图上方位格" required>
+          <select v-model="form.gridPosition" class="native-field" data-testid="field-gridPosition">
+            <option v-for="position in GRID_POSITIONS" :key="position" :value="position">{{ position }}格</option>
           </select>
         </el-form-item>
         <el-form-item label="异写异读">
